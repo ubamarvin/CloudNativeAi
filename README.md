@@ -124,19 +124,19 @@ Fehler kommen schon bei Temperature 0 vor, welche erst bei höheren Werten? Was 
 Modell: llama3.2:3b
 Prompt: Wofür steht die Abkürzung HTWG in HTWG-Konstanz? Antworte in einem Satz
 
-# unvollständig
+### unvollständig
 Temperature 0.0: 2 verschiedene Antworten bei 5 Durchläufen
    4× Die Abkürzung HTWG steht für Hochschule Technik und Wirtschaft in Konstanz.
    1× Die Abkürzung HTWG in HTWG-Konstanz steht für Hochschule für Technik und Wirtschaft.
 
-# unvollständig bis falsch
+### unvollständig bis falsch
 Temperature 0.7: 4 verschiedene Antworten bei 5 Durchläufen
    2× Die Abkürzung HTWG in HTWG-Konstanz steht für Hochschule für Technik und Wirtschaft.
    1× Die Abkürzung HTWG steht für Heilbronn-Treuchtlingen-Wertheim-Göggingen.
    1× Die Abkürzung HTWG in HTWG-Konstanz steht für Historisches Technikmuseum der Wirtschaftsgeschichte.
    1× Die Abkürzung HTWG steht für "Hochschule Technik und Wirtschaft Geisenheim" in der Konstanz.
 
-# unvollständig bis Halu
+### unvollständig bis Halu
 Temperature 1.2: 5 verschiedene Antworten bei 5 Durchläufen
    1× Die HTWG in HTWG-Konstanz steht zum Teil für Hochschule Technik Wertheim-Gimmeldingen.
    1× Die Abkürzung HTWG in HTWG-Konstanz steht für Hochschule für Technik und Wirtschaft (Hecht).
@@ -428,7 +428,8 @@ anfrageRaw
 Mail: Hallo, ich studiere AIN im 3. Semester und habe die Anmeldung für Mathe 3 verpasst. Geht das noch bis Freitag, 16.10.?
 Ergebnis: anliegen='pruefung' studiengang='AIN' frist='2023-10-20'
 Erwartet: {'anliegen': 'pruefung', 'studiengang': 'AIN', 'frist': '16.10.'}
-Bewertung: ✓
+Bewertung: ✓git remote add origin https://github.com/ubamarvin/CloudNativeAi.git
+git push -u origin main
 
 anfrageRaw
 {
