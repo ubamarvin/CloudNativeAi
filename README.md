@@ -5,13 +5,7 @@ Die Aufgabennummern entsprechen dem Aufgabenblatt `uebung_1.md`.
 
 ## Noch unbeantwortete oder unvollständige Aufgaben (Teil 1–5)
 
-| Teil | Aufgabe | Was fehlt? |
-|---|---|---|
-| 1 | — | Keine unbeantworteten Fragen. |
-| 2 | — | Keine unbeantworteten Fragen. |
-| 3 | Sampling, Aufgabe 3 (teilweise) | Den Einfluss des Samplings bei höheren Temperaturen ausdrücklich von Fehlern durch fehlendes oder falsches Modellwissen abgrenzen; bisher stehen dazu Beispiele und eine kurze Vermutung. |
-| 4 | Aufgabe 3 (teilweise) | Erklären, warum das Schema den Text `"null"` und erfundene Fristen zulässt. |
-| 4 | Aufgabe 4 (teilweise) | Das tatsächliche Verhalten beider Modelle bei der Prompt Injection beschreiben; bisher gibt es nur eine vorläufige Erklärungsnotiz und die Protokolle. |
+ beschreiben; bisher gibt es nur eine vorläufige Erklärungsnotiz und die Protokolle. |
 | 4 | Aufgabe 5 (teilweise) | Erklären, warum erneute Versuche bei Temperature 0 nichts bringen und was man ändern könnte; Versuchsprotokolle sind vorhanden. |
 | 5 | Aufgabe 1 | Namen und Matrikelnummern ergänzen. |
 | 5 | Aufgabe 2 | Startbefehl und benötigte `.env` dokumentieren. |
@@ -131,6 +125,14 @@ Temperature 1.2: 5 verschiedene Antworten bei 5 Durchläufen
 
 ```
 
+###
+zu den Temp
+angenommen nächste prop tokens sind
+re 7
+io 5
+jo 2
+i 1.2
+
 ### Sampling · Aufgabe 2: Reproduzierbarkeit bei Temperature 0
 
 **Frage:** Liefert Temperature 0 wirklich fünfmal dieselbe Antwort? Wenn nicht: Woran könnte das liegen?
@@ -156,7 +158,7 @@ Fehler kommen schon bei Temperature 0 vor, welche erst bei höheren Werten? Was 
 Temperature 0.0: 2 verschiedene Antworten bei 5 Durchläufen
    4× Die Abkürzung HTWG steht für Hochschule Technik und Wirtschaft in Konstanz.
    1× Die Abkürzung HTWG in HTWG-Konstanz steht für Hochschule für Technik und Wirtschaft.
-
+//warum trotz tmp 0 mehrere Antworten
 ```
 
 #### Temperature 0,7 · Unvollständige bis falsche Antworten
@@ -182,7 +184,7 @@ Temperature 1.2: 5 verschiedene Antworten bei 5 Durchläufen
 
 ```
 
-**Vermutete Ursache:** Wenig bis keine HTWG-bezogenen Trainingsdaten.
+**Vermutete Ursache:** Wenig bis keine HTWG-bezogenen Trainingsdaten. Temp 0 führt zur Auswahl warscheinlichster Tokens, höhere zu unwarscheinliccheren
 
 
 ### Tokens · Aufgabe 1: Deutsch und Englisch
@@ -370,14 +372,14 @@ Bewertung: ✗
 
 **Bisher dokumentiert:** Textwerte `"null"` und erfundene Fristen sind in den Protokollen oben markiert.
 
-**Noch offen:** Erklärung, warum das Schema diese Werte zulässt.
+**Antwort:** Schema garantiert Form nicht Fülle
 
 ### Aufgabe 4 · Prompt Injection
 
 **Frage:** Die letzte Mail in mails.json versucht, das Modell umzulenken. Was passiert? (Darum geht es
 in VL 3.)
 
-**Antwort (bisherige Notiz):** Da die Anfrage response format gesetzt hat, wählt das llm die zu dem responsefomat passendedn tokens aus. Diese haben wegen der promptInjection? niedirge Logits
+**Antwort:** Da die Anfrage response format gesetzt hat, wählt das llm die zu dem responsefomat passendedn tokens aus. Diese haben wegen der promptInjection? niedirge Logits
 
 ### Aufgabe 5 · Versuch ohne `response_format`
 
@@ -386,6 +388,7 @@ in VL 3.)
 **Dokumentierte Versuche:** Die Protokolle zeigen unter anderem einen falsch geschriebenen Schlüssel (`studienengang`), ein zurückgegebenes Schema statt ausgefüllter Daten und ungültige Anliegen (`leihfrist`, `wlan`).
 
 **Noch offen:** Ausformulierte Antwort zu den Wiederholungsversuchen bei Temperature 0 und möglichen Änderungen.
+**Antwort:** 
 
 <details>
 <summary>Rohantworten, Prompt-Varianten und Validierungsfehler</summary>
