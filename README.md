@@ -5,7 +5,9 @@ Die Aufgabennummern entsprechen dem Aufgabenblatt `uebung_1.md`.
 
 ## Noch unbeantwortete oder unvollständige Aufgaben (Teil 1–5)
 
- beschreiben; bisher gibt es nur eine vorläufige Erklärungsnotiz und die Protokolle. |
+| Teil | Aufgabe | Was fehlt? |
+| :---: | :--- | :--- |
+| 4 | Aufgabe 4 (teilweise) | Das Verhalten beider Modelle bei der Prompt Injection beschreiben; bisher gibt es nur eine vorläufige Erklärungsnotiz und die Protokolle. |
 | 4 | Aufgabe 5 (teilweise) | Erklären, warum erneute Versuche bei Temperature 0 nichts bringen und was man ändern könnte; Versuchsprotokolle sind vorhanden. |
 | 5 | Aufgabe 1 | Namen und Matrikelnummern ergänzen. |
 | 5 | Aufgabe 2 | Startbefehl und benötigte `.env` dokumentieren. |
