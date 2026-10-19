@@ -68,6 +68,7 @@ class Anfrage(BaseModel):
     anliegen: Literal["pruefung", "mensa", "bibliothek", "sonstiges"]
     studiengang: str | None
     frist: str | None
+ 
 
     @field_validator("studiengang", "frist", mode="before")
     @classmethod
