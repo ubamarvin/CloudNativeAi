@@ -3,27 +3,6 @@
 Ergebnisse und Antworten zu den Aufgaben der Übung 1 (Cloud-native AI).
 Die Aufgabennummern entsprechen dem Aufgabenblatt `uebung_1.md`.
 
-## Noch unbeantwortete oder unvollständige Aufgaben (Teil 1–5)
-
-Die Übersicht bezieht sich auf die aktuell im README dokumentierten Antworten. „Teilweise“ bedeutet, dass bereits Notizen oder Ergebnisse vorhanden sind, aber noch eine Erklärung fehlt.
-
-| Teil | Aufgabe | Status | Was fehlt? |
-| :---: | :--- | :--- | :--- |
-| 1 | Aufgaben 1–2 | Beantwortet | Keine offenen Fragen. |
-| 2 | Aufgaben 1–2 | Beantwortet | Keine unbeantworteten Fragen. |
-| 3 | Sampling, Aufgabe 2 | Teilweise | Die bei der Faktenfrage trotz Temperature 0 beobachteten zwei Antworten mit der Erklärung zur Reproduzierbarkeit verknüpfen; die entsprechende Rückfrage steht noch im Protokoll. |
-| 3 | Sampling, Aufgabe 3 | Teilweise | Aus den Beispielen ausdrücklich ableiten, welche Fehler schon bei Temperature 0 auftreten und welche bei höheren Werten hinzukommen; die Ursache ist bisher nur knapp notiert. |
-| 4 | Aufgabe 3 | Teilweise | Konkret erklären, warum sowohl der Text `"null"` als auch erfundene Fristen zum Schema passen; „Form nicht Fülle“ ist bisher nur ein Stichwort. |
-| 4 | Aufgabe 4 | Teilweise | Das beobachtete Verhalten beider Modelle bei der Prompt Injection beschreiben und die noch mit Fragezeichen versehene Erklärung klären. |
-| 4 | Aufgabe 5 | Teilweise | Erklären, warum unveränderte Wiederholungen bei Temperature 0 nichts bringen und was man ändern könnte; Versuchsprotokolle sind vorhanden. |
-| 5 | Aufgabe 1 | Unbeantwortet | Namen und Matrikelnummern ergänzen. |
-| 5 | Aufgabe 2 | Teilweise | Den konkreten Startbefehl und die benötigte `.env`-Konfiguration angeben; der bisherige Verweis ersetzt diese Angaben nicht. |
-| 5 | Aufgabe 4.1 | Teilweise | Die Stichworte zur Konfiguration in `.env` zu zwei bis vier erklärenden Sätzen ausformulieren. |
-| 5 | Aufgabe 4.2 | Teilweise | Die Begründung für Temperature 0 ausformulieren und die offene Frage zur passenden Bezeichnung klären (zwei bis vier Sätze). |
-| 5 | Aufgabe 4.3 | Teilweise | Die Aussage „Form nicht Fülle“ zu zwei bis vier Sätzen über Garantien und Grenzen von `response_format` mit Schema ausformulieren. |
-| 5 | Aufgabe 4.4 | Teilweise | Je zwei Gründe für lokale Modelle und Cloud-Dienste ausformulieren und die noch mit Fragezeichen versehenen Überlegungen klären (zwei bis vier Sätze). |
-
-Die übrigen Aufgaben aus Teil 3 sowie Teil 4, Aufgaben 1–2, sind beantwortet. Teil 5, Aufgabe 3, verweist auf diese Ergebnisse; deren offene Erklärungen sind oben aufgeführt.
 
 ## Inhalt
 
