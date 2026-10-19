@@ -151,6 +151,10 @@ i 1.2
 
 **Antwort:** Im ersten Versuch liefert das Modell fünfmal dieselbe Antwort. Die Hardware und Dynamic Batching können das Ergebnis beeinflussen.
 
+Hardware:
+Nicht deterministische GPU Berechnungen (zb. durch parallele Threads) können zu unterschiedlichen Ergebnissen führen. 
+
+
 ### Sampling · Aufgabe 3: Faktenfrage und Fehlerursachen
 
 **Aufgabe:** Startet das Skript mit einer Faktenfrage, z. B. sampling.py "Ist die HTWG Konstanz eine
@@ -162,6 +166,9 @@ Fehler kommen schon bei Temperature 0 vor, welche erst bei höheren Werten? Was 
 **Modell:** `llama3.2:3b`
 
 **Verwendeter Prompt:** Wofür steht die Abkürzung HTWG in HTWG-Konstanz? Antworte in einem Satz
+
+**Vermutete Ursache:** Wenig bis keine HTWG-bezogenen Trainingsdaten. Temp 0 führt zur Auswahl des warscheinlichsten Tokens, höhere zur Auswahl evtl Unwarscheinlicheren, welche dann evtl quatsch sein können 
+**Frage:** Mehr Trainingsdaten ( sowohl Base als auch Assistent ) gleich bessere Ausgabe trotz hoher Temp und somit besseren verlass auf Temp 0???????? Oder auf Hw Eben lösen?
 
 #### Temperature 0,0 · Unvollständige Antworten
 
@@ -195,7 +202,7 @@ Temperature 1.2: 5 verschiedene Antworten bei 5 Durchläufen
 
 ```
 
-**Vermutete Ursache:** Wenig bis keine HTWG-bezogenen Trainingsdaten. Temp 0 führt zur Auswahl warscheinlichster Tokens, höhere zu unwarscheinliccheren
+
 
 
 ### Tokens · Aufgabe 1: Deutsch und Englisch
@@ -383,14 +390,14 @@ Bewertung: ✗
 
 **Bisher dokumentiert:** Textwerte `"null"` und erfundene Fristen sind in den Protokollen oben markiert.
 
-**Antwort:** Schema garantiert Form nicht Fülle
+**Antwort:** Sowphl bei Studiengang als auch bei Frist steht manchmal der Text 'null' anstatt wie gewollt (aber nicht explizit definiert in der Anfrage) NONE. Es wurde eine Frist hallizuniert. Das Schema lässt beides durch, weil diese eben in das Schema passen, das Schema garantiert Form, also die Struktur der Antwort als JSON String aber nicht Fülle, also die eigentlichen Werte der jeweiligen Felder
 
 ### Aufgabe 4 · Prompt Injection
 
 **Frage:** Die letzte Mail in mails.json versucht, das Modell umzulenken. Was passiert? (Darum geht es
 in VL 3.)
 
-**Antwort:** Da die Anfrage response format gesetzt hat, wählt das llm die zu dem responsefomat passendedn tokens aus. Diese haben wegen der promptInjection? niedirge Logits
+**Antwort:** Da die Anfrage response format gesetzt hat, wählt das llm die zu dem responsefomat passendedn tokens aus (Constrained Decoding). Diese haben wegen der promptInjection niedirge Logits und könnten Tokens, die in Gedichten vorkommen können ähneln
 
 ### Aufgabe 5 · Versuch ohne `response_format`
 
@@ -398,15 +405,21 @@ in VL 3.)
 
 **Dokumentierte Versuche:** Die Protokolle zeigen unter anderem einen falsch geschriebenen Schlüssel (`studienengang`), ein zurückgegebenes Schema statt ausgefüllter Daten und ungültige Anliegen (`leihfrist`, `wlan`).
 
-**Noch offen:** Ausformulierte Antwort zu den Wiederholungsversuchen bei Temperature 0 und möglichen Änderungen.
 **Antwort:** 
+Ohne response Format kein constraint Decoding, bedeutet gewünschte Form/JSONStruktur nicht mehr garantiert, Felder können fehlen, zu viel sein, falsch geschrieben sein.
+
+Ein erneuter Versuch bei Temp 0 bringt nix, da Greedy decoding immer das mit den höchsten digix auswählt...
+
+Eine SystemPrompt, welche Form definieren und Füll Beispiel mitgeben ( hat auch geklappt)
+
+
 
 <details>
 <summary>Rohantworten, Prompt-Varianten und Validierungsfehler</summary>
 
+## ohne constrained Decoding erzwungen durch responseFormat
 ```text
 
-1.Mail
 Macht eig genau das was SysPrompt bezüglich des Datums setzt
 anfrageRaw
 
@@ -440,7 +453,10 @@ anfrageRaw
 Versuch 3/3 fehlgeschlagen: 1 validation error for Anfrage
 
 
-# Sys prompt hat json definition
+
+
+
+## Sys prompt hat json definition
 
          Prompt:
          Du ordnest Mails von Studierenden an die HTWG Konstanz ein. Antworte ausschließlich mit JSON
@@ -512,9 +528,8 @@ anfrageRaw
 Versuch 1/3 fehlgeschlagen: 3 validation errors for Anfrage
 
 
-Prompt:
+## Sys prompt hat json definition plus Aufforderung im folgenden Format zu antworten:
 
-So wie oben mit "Antworte ausschließlich in folgendem JSON-Format:
 
 {
     "anliegen": "pruefung",
@@ -563,6 +578,8 @@ anfrageRaw
     "studiengang": "AIN",
     "frist": null
 }
+
+
 Mail: Gibt es heute in der Mensa auch was Veganes?
 Ergebnis: anliegen='mensa' studiengang='AIN' frist=None
 Erwartet: {'anliegen': 'mensa', 'studiengang': None, 'frist': None}
