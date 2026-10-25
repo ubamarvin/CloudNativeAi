@@ -8,7 +8,7 @@ Aufruf:
 import sys
 from collections import Counter
 
-from llm import MODEL, frage
+from uebung_1.app.llm import MODEL, frage
 
 TEMPERATUREN = [0.0, 0.7, 1.2]
 DURCHLAEUFE = 5

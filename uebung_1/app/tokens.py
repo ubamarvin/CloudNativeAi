@@ -8,7 +8,7 @@ Aufruf:
     docker compose run --rm app tokens.py
 """
 
-from llm import MODEL, client
+from uebung_1.app.llm import MODEL, client
 
 # TEXTE = {
 #     "Deutsch": "Wie melde ich mich im Studiengang Angewandte Informatik "

@@ -6,7 +6,7 @@ Aufruf:
 
 import math
 
-from llm import MODEL, client, frage
+from uebung_1.app.llm import MODEL, client, frage
 
 print(f"Modell: {MODEL}\n")
 

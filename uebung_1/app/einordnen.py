@@ -17,7 +17,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ValidationError, field_validator
 
-from llm import MODEL, client
+from uebung_1.app.llm import MODEL, client
 
 SYSTEM_PROMPT = (
     "Du ordnest Mails von Studierenden an die HTWG Konstanz ein. "
