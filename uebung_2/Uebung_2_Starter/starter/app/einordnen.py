@@ -14,7 +14,7 @@ import json
 import time
 from typing import Literal
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, field_validator
 
 from llm import MODEL, client
 from prompts import Prompt, lade
@@ -26,6 +26,26 @@ class Anfrage(BaseModel):
     anliegen: Literal["pruefung", "mensa", "bibliothek", "sonstiges"]
     studiengang: str | None
     frist: str | None
+
+    @field_validator("studiengang", "frist", mode="before")
+    @classmethod
+    def leer_zu_none(cls, wert):
+        if isinstance(wert, str):
+            if wert.strip().lower() in ("null", "none", ""):
+                return None
+        return wert
+    @field_validator("studiengang")
+    @classmethod
+    def studiengang_validieren(cls, wert):
+        if wert is None:
+            return None
+    
+        erlaubte_studiengaenge = {"AIN", "WIN", "MSI"}
+    
+        if wert.upper() not in erlaubte_studiengaenge:
+            return None
+    
+        return wert.upper()
 
 
 def schema_von(modell: type[BaseModel]) -> dict:
@@ -47,6 +67,7 @@ def einordnen(
     Wer eine Liste als protokoll übergibt, bekommt pro Aufruf ein Paar
     (Eingabe-Tokens, Sekunden) angehängt. vergleich.py nutzt das.
     """
+    ### range(start, stop, step)
     for versuch in range(1, versuche + 1):
         start = time.perf_counter()
         antwort = client.chat.completions.create(
@@ -74,6 +95,7 @@ def felder_richtig(ergebnis: Anfrage, erwartet: dict) -> dict[str, bool]:
     richtig, wenn die erwartete Frist im Ergebnis enthalten ist:
     "Freitag, 16.10." passt also zu "16.10.".
     """
+    ## ternary expression... wert_wenn_wahr if bedingung else wert_wenn_falsch, so hässlich
     frist_ok = (
         ergebnis.frist is None
         if erwartet["frist"] is None
@@ -90,15 +112,22 @@ def auswerten(prompt: Prompt) -> None:
     """Ordnet alle Test-Mails ein und vergleicht mit dem Erwarteten."""
     with open("mails.json", encoding="utf-8") as f:
         faelle = json.load(f)
+    # chained assignment
+    # gleichwertig zu:
+    # anliegen_ok = 0
+    # alles_ok = 0
     anliegen_ok = alles_ok = 0
     for fall in faelle:
         ergebnis = einordnen(fall["mail"], prompt)
         ok = felder_richtig(ergebnis, fall["erwartet"])
+        ## python behandelt boolesche Werte bei arithmetischen Operationen wie Zahlen.
         anliegen_ok += ok["anliegen"]
+        ## all prüft ob alle werte true sind
         alles_ok += all(ok.values())
         zeichen = "".join("✓" if v else "✗" for v in ok.values())
         print(f"{zeichen}  {fall['mail'][:70]}")
         print(f"     {ergebnis.model_dump()}")
+        print(f"     {fall["erwartet"]}")
     n = len(faelle)
     print(f"\n{prompt.kennung} mit {MODEL}:")
     print(f"  Anliegen richtig:   {anliegen_ok} von {n}")
@@ -107,8 +136,11 @@ def auswerten(prompt: Prompt) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    #positions Argument
     parser.add_argument("mail", nargs="*", help="eigene Mail statt mails.json")
+    #optionales Argument
     parser.add_argument("--prompt", default=STANDARD_PROMPT)
+    # ab hier werden Kommandozeilen argumente eingelsen
     args = parser.parse_args()
     prompt = lade(args.prompt)
     if args.mail:

@@ -16,7 +16,7 @@ from pydantic import BaseModel
 
 PLATZHALTER = "{eingabe}"
 
-
+### class Prompt extends BaseModel
 class Prompt(BaseModel):
     name: str
     version: int
@@ -27,6 +27,9 @@ class Prompt(BaseModel):
     system: str
     user: str = PLATZHALTER
 
+    # ohne @property: object.kennung()
+    # mit  @property: object.kennung
+    # -> bedeutet Methode soll str zurückgeben
     @property
     def kennung(self) -> str:
         return f"{self.name}.v{self.version}"
@@ -38,15 +41,17 @@ class Prompt(BaseModel):
         kein str.format: Prompts enthalten oft JSON mit geschweiften
         Klammern, die format() als Platzhalter missverstehen würde.
         """
-        return [
+        return [ ### so confusing tbh
             {"role": "system", "content": self.system.replace(PLATZHALTER, eingabe)},
             {"role": "user", "content": self.user.replace(PLATZHALTER, eingabe)},
         ]
 
-
+### function akzeptiert entwerder String oder ein Path object
 def lade(pfad: str | Path) -> Prompt:
     """Liest eine Prompt-Datei und prüft sie gegen das Schema oben."""
     with open(pfad, encoding="utf-8") as f:
+        ### yaml.safe load verwandelt yaml datei in ein Dictionary
+        ### model_validate prüft ob daraus ein gültiges Object gemacht werden kann und erstell dieses ggfalss
         return Prompt.model_validate(yaml.safe_load(f))
 
 
