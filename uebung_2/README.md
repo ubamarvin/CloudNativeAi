@@ -16,4 +16,3 @@ Jede Version bleibt unverändert, damit Ergebnisse nachvollziehbar und vergleich
 - **Alle Felder richtig:** 8 von 16 (50 %)
 
 Die Ergebnisse zeigen, dass das Modell die Kategorie des Anliegens meistens richtig erkennt. Bei der vollständigen Einordnung treten jedoch zusätzliche Fehler auf, beispielsweise bei Studiengang und Frist. Außerdem gab das Modell in einigen Fällen den Text "null" statt eines echten JSON-Nullwerts aus und ließ sich in der letzten Test-Mail durch eine manipulative Anweisung beeinflussen.
-
