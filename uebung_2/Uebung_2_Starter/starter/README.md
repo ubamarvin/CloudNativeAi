@@ -679,6 +679,376 @@ Modell: llama3.2:3b, Guardrail an
 
 
 
+
+### Teil 4 Rag
+
+## 4.1
+4.1 · Alles in den Kontext (ca. 20 min)
+docker compose run --rm app alles.py "Ich bin am Tag meiner Klausur krank. Was muss ich tun?"
+docker compose run --rm app alles.py "Wo kann ich mein Auto abstellen?"
+
+###
+docker compose run --rm app alles.py "Ich bin am Tag meiner Klausur krank. Was muss ich tun?"
+
+Ihr müsst ein ärztliches Attest einreichen, das die Prüfungsunfähigkeit am Prüfungstag bestätigt. Eine einfache Arbeitsunfähigkeitsbescheinigung reicht nicht. Das Attest muss innerhalb von drei Werktagen nach dem Prüfungstermin beim Prüfungsamt eingehen, zusammen mit dem Formular PA-07 „Antrag auf Anerkennung der Prüfungsunfähigkeit“.
+
+  Kontext: abschlussarbeit.md, auslandssemester.md, beratung.md, bibliothek.md, campuskarte.md, drucken.md, fundbuero.md, lernraeume.md, mensa.md, nachteilsausgleich.md, parken.md, praxissemester.md, pruefungsanmeldung.md, pruefungsordnung.md, pruefungsunfaehigkeit.md, raeume.md, rueckmeldung.md, semesterticket.md, sport.md, wiederholungspruefung.md, wlan.md
+  3905 Eingabe-Tokens · Suche 0.00 s · Antwort 60.5 s · llama3.2:3b
+
+####
+docker compose run --rm app alles.py "Wo kann ich mein Auto abstellen?"
+
+Auf dem Campus gibt es zwei Parkplätze für Kfz: P1 hinter Gebäude A und das Parkhaus P2 an der Brauneggerstraße. Für beide braucht ihr einen Parkausweis, der 45 Euro pro Semester kostet und im Studierendenportal beantragt wird.
+
+  Kontext: abschlussarbeit.md, auslandssemester.md, beratung.md, bibliothek.md, campuskarte.md, drucken.md, fundbuero.md, lernraeume.md, mensa.md, nachteilsausgleich.md, parken.md, praxissemester.md, pruefungsanmeldung.md, pruefungsordnung.md, pruefungsunfaehigkeit.md, raeume.md, rueckmeldung.md, semesterticket.md, sport.md, wiederholungspruefung.md, wlan.md
+  3898 Eingabe-Tokens · Suche 0.00 s · Antwort 38.6 s · llama3.2:3b
+
+
+
+1. Notiert Eingabe-Tokens und Dauer beider Aufrufe. Der zweite ist deutlich schneller, obwohl er gleich viele Tokens hat. Warum? Tipp: Was
+ist bei beiden Aufrufen gleich, und in welcher Reihenfolge stehen Wissen und Frage in der Nachricht?
+
+| Anfrage | Eingabe-Tokens | Antwortdauer |
+|---|---:|---:|
+| Krank am Klausurtag | 3.905 | 60,5 s |
+| Parkplatz auf dem Campus | 3.898 | 38,6 s |
+
+
+Der zweite Aufruf war trotz nahezu identischer Tokenanzahl etwa 36 % schneller. Der Grund dafür ist das Prompt Caching: Bei beiden Anfragen wird dieselbe Wissensbasis aus 21 Markdown-Dateien am Anfang des Prompts übergeben. Lediglich die Benutzerfrage am Ende verändert sich. Ollama kann die bereits berechneten Teile des unveränderten Prompt-Anfangs aus dem Cache wiederverwenden und muss hauptsächlich die neuen Tokens verarbeiten. Auch Unterschiede beim Laden des Modells können die Laufzeiten beeinflussen.
+
+
+2. Schätzt: Was passiert mit Tokens, Kosten und Antwortqualität, wenn die Wissensbasis statt 21 Dateien 2.000 h
+
+Bei vergleichbarer durchschnittlicher Dateigröße würde die Wissensbasis ungefähr um den Faktor 95 wachsen. Der Wissensanteil des Prompts würde damit von knapp 3.900 auf ungefähr 370.000 Tokens steigen.
+
+Tokens: Der Tokenverbrauch steigt nahezu proportional zur Größe der Wissensbasis. Die gesamte Wissensbasis könnte das Kontextfenster des Modells überschreiten.
+
+Kosten: Bei kostenpflichtigen APIs steigen die Verarbeitungskosten mit der Anzahl der Tokens. Auch lokal erhöhen sich Speicherbedarf und Rechenaufwand.
+
+Antwortqualität: Mehr Informationen bedeuten nicht automatisch bessere Antworten. Das Modell kann relevante Informationen in sehr langen Kontexten übersehen (Lost in the Middle beziehungsweise Context Rot). Zudem steigt die Gefahr, dass irrelevante Inhalte die Antwort beeinflussen.
+
+Bei 2.000 Dateien wäre es daher sinnvoll, nicht mehr die gesamte Wissensbasis in den Prompt aufzunehmen, sondern relevante Dokumente gezielt über File-based Retrieval oder RAG abzurufen.
+
+
+## 4.2
+
+
+# docker compose run --rm app datei_suche.py --woerter "Ich bin am Tag meiner Klausur krank. Was muss ich tun?"
+
+
+Suchbegriffe: ['tag', 'meiner', 'klausur', 'krank', 'tun']
+     9  beratung.md
+     7  bibliothek.md
+     4  praxissemester.md
+
+Wenn du am Tag deiner Klausur krank bist, solltest du dich an die Telefonseelsorge wenden, die rund um die Uhr erreichbar ist.
+
+  Kontext: beratung.md, bibliothek.md, praxissemester.md
+  811 Eingabe-Tokens · Suche 0.01 s · Antwort 60.8 s · llama3.2:3b
+
+# docker compose run --rm app datei_suche.py "Ich bin am Tag meiner Klausur krank. Was muss ich tun?"
+
+Suchbegriffe: ['Krankheit', 'Arzt', 'Medizin', 'Krankenhaus', 'Notdoktor', 'Notfall']
+     1  praxissemester.md
+
+Wenn du am Tag deiner Klausur krank bist, solltest du dich an das Praktikantenamt wenden und deine Krankheitstage nachholen. Denke daran, dass Krankheitstage über fünf Tage hinaus nachgeholt werden müssen. Informiere dich über den Ausbildungsvertrag, um sicherzustellen, dass du alle Anforderungen erfüllst. (Quelle: praxissemester.md)
+
+  Kontext: praxissemester.md
+  323 Eingabe-Tokens · Suche 13.55 s · Antwort 29.9 s · llama3.2:3b
+
+# docker compose run --rm app datei_suche.py --woerter "Wer sitzt in Raum F-201?"
+
+Suchbegriffe: ['sitzt', 'raum', 'f-201']
+     3  pruefungsanmeldung.md
+     3  raeume.md
+     2  nachteilsausgleich.md
+
+In Gebäude F liegt der Raum F-012 im Erdgeschoss.
+
+  Kontext: nachteilsausgleich.md, pruefungsanmeldung.md, raeume.md
+  736 Eingabe-Tokens · Suche 0.01 s · Antwort 34.3 s · llama3.2:3b
+
+
+1. Welche Dateien findet die Suche mit den Wörtern der Frage, und warum gerade diese? Schaut euch an, welche Wortteile treffen.
+
+**Ausführlich:** Bei der Frage zur Krankheit am Klausurtag sucht `--woerter` nach `tag`, `meiner`, `klausur`, `krank` und `tun`. Die Suche zählt alle Vorkommen dieser Zeichenketten im Text, auch mitten in einem Wort:
+
+- `beratung.md`: 9 Treffer, davon 2 für `tag` in „Dienstag“ und „Donnerstag“ sowie 7 für `tun`, beispielsweise in „Beratung“, „Studienberatung“ und „Überlastung“.
+- `bibliothek.md`: 7 Treffer, davon 6 für `tag` in „Montag“, „Freitag“, „Samstag“, „Feiertagen“, „werktags“ und „Tag“ sowie 1 für `tun` in „Stunden“.
+- `praxissemester.md`: 4 Treffer, davon 3 für `tag` in „Präsenztage“, „Krankheitstage“ und „Tage“ sowie 1 für `krank` in „Krankheitstage“.
+
+Die fachlich richtige Datei `pruefungsunfaehigkeit.md` erhält nur 3 Treffer für `tag`: zweimal in „Prüfungstag“ und einmal in „Werktagen“. Sie wird deshalb von den drei anderen Dateien verdrängt. Die Bewertung misst Zeichenkettenhäufigkeit und berücksichtigt weder die Bedeutung noch die Relevanz eines Begriffs.
+
+**Kurz:** Gefunden werden `beratung.md` (9), `bibliothek.md` (7) und `praxissemester.md` (4). Häufige Wortteile wie `tag` und `tun` erzeugen viele irrelevante Treffer; die richtige Datei hat nur 3 Treffer.
+
+2. Welche Suchbegriffe schlägt das Modell vor? Welche Begriffe hätte es wählen müssen, um die richtige Datei zu finden?
+
+**Ausführlich:** Im protokollierten Aufruf schlägt das Modell `Krankheit`, `Arzt`, `Medizin`, `Krankenhaus`, `Notdoktor` und `Notfall` vor. Diese Begriffe beziehen sich allgemein auf Krankheit und medizinische Versorgung, erfassen aber den entscheidenden Zusammenhang mit einer Prüfung nicht. Nur `Krankheit` trifft einmal in `praxissemester.md`, nämlich in „Krankheitstage“. Deshalb wird eine Datei über das Praxissemester statt über den krankheitsbedingten Prüfungsrücktritt ausgewählt.
+
+Geeignete Suchbegriffe wären `Prüfungsunfähigkeit`, `prüfungsunfähig`, `Attest`, `Prüfungstag` oder `PA-07`. Diese Zeichenketten stehen tatsächlich in `pruefungsunfaehigkeit.md` und würden die gesuchte Regelung auffindbar machen. Gerade bei einer reinen Textsuche müssen die Begriffe zur konkreten Wortwahl der Dokumente passen; ein semantisch verwandtes Wort wie „Arzt“ trifft beispielsweise nicht automatisch „ärztliches“.
+
+**Kurz:** Das Modell nennt allgemeine medizinische Begriffe und findet damit nur das Praxissemester. Mit `Prüfungsunfähigkeit`, `Attest` oder `PA-07` hätte es die richtige Datei gefunden.
+
+3. Bei „Raum F-201“ steht die Zeichenkette wörtlich in einer Datei, und trotzdem landet die Datei nicht unter den ersten drei. Warum nicht?
+Was müsste die Bewertung anders machen?
+
+**Ausführlich:** Die gesuchte Angabe steht in `praxissemester.md`: „Praktikantenamt, Raum F-201“. Gesucht wird aber nach den einzelnen Begriffen `sitzt`, `raum` und `f-201`, nicht nach der gesamten Phrase. Die Datei bekommt deshalb nur 2 Punkte: einen für `raum` und einen für `f-201`. Dagegen erreichen `pruefungsanmeldung.md` und `raeume.md` jeweils 3 Punkte allein für `raum`, unter anderem als Wortteil in „Anmeldezeitraum“, „Prüfungszeitraums“ beziehungsweise „Raumnummer“. `nachteilsausgleich.md` hat ebenfalls 2 Punkte, weil dort zweimal „Raum“ steht. Bei Gleichstand bleibt die ursprüngliche Reihenfolge erhalten; die Dokumente werden alphabetisch geladen, sodass `nachteilsausgleich.md` vor `praxissemester.md` steht.
+
+Die Bewertung müsste den seltenen, präzisen Identifikator `F-201` stärker gewichten als das allgemeine Wort `Raum`. Zusätzlich könnte sie einen Bonus für die vollständige Phrase `Raum F-201` vergeben, die Anzahl unterschiedlicher passender Suchbegriffe berücksichtigen oder zuerst gezielt nach der Raumnummer suchen. Eine Wortgrenzensuche würde außerdem zufällige Treffer in „Anmeldezeitraum“ verhindern.
+
+**Kurz:** `praxissemester.md` bekommt nur 2 Punkte und verliert gegen häufige `raum`-Treffer sowie den alphabetischen Gleichstand. Ein exakter Treffer auf `F-201` beziehungsweise `Raum F-201` müsste stärker zählen.
+
+4. Claude Code arbeitet genau so, ohne Index, und findet trotzdem fast immer die richtige Stelle. Was hat Claude Code, was unser Aufbau
+nicht hat? Nennt zwei Unterschiede.
+
+**Ausführlich:** Zwei entscheidende Unterschiede sind:
+
+1. **Mehrere Suchschritte mit Rückmeldung:** Ein agentischer Coding-Assistent kann Suchergebnisse lesen, ihre Relevanz beurteilen und anschließend neue, präzisere Suchanfragen stellen. Nach unpassenden Treffern zur Krankheit könnte er beispielsweise nach „Attest“ oder „Prüfungsunfähigkeit“ suchen. Unser Aufbau erzeugt die Begriffe einmal, führt genau eine Suche aus und verwendet die ausgewählten Dateien unmittelbar für die Antwort. Eine Schleife zur Korrektur der Suche fehlt.
+2. **Gezielte Werkzeuge und Navigation:** Ein Coding-Assistent kann Dateinamen und Verzeichnisstrukturen erkunden, exakte Zeichenketten oder reguläre Ausdrücke suchen und passende Ausschnitte beziehungsweise weitere Dateien lesen. Bei der Raumfrage könnte er direkt nach `F-201` suchen und die Fundstelle prüfen. Unser Aufbau reduziert die Auswahl dagegen auf die Summe einfacher Teilworttreffer und höchstens drei vollständige Dateien. Er bietet dem antwortenden Modell keine weiteren Such- oder Leseschritte.
+
+**Kurz:** Ein Coding-Assistent kann erstens iterativ suchen und seine Suchbegriffe korrigieren sowie zweitens gezielte Such- und Navigationswerkzeuge einsetzen. Unser Aufbau hat nur einen Suchdurchlauf mit einfacher Trefferzählung.
+
+
+## 4.3 rag
+
+# docker compose run --rm app rag.py --index
+
+21 Abschnitte aus 21 Dateien indexiert, 768 Dimensionen, 13.4 s (granite-embedding:278m)
+
+
+# docker compose run --rm app rag.py "Ich bin am Tag meiner Klausur krank. Was muss ich tun?"
+
+  0.673  pruefungsunfaehigkeit.md   
+  0.663  praxissemester.md          
+  0.650  beratung.md                
+  0.638  nachteilsausgleich.md      
+
+Um nach einer Prüfungsunfähigkeit aus gesundheitlichen Gründen zu klären, benötigt ihr ein ärztliches Attest, das die Prüfungsunfähigkeit am Prüfungstag bestätigt. Dies muss innerhalb von drei Werktagen nach dem Prüfungstermin beim Prüfungsamt eingehen.
+
+  Kontext: beratung.md, nachteilsausgleich.md, praxissemester.md, pruefungsunfaehigkeit.md
+  924 Eingabe-Tokens · Suche 0.13 s · Antwort 76.8 s · llama3.2:3b
+
+#  docker compose run --rm app vergleich_wissen.py rag
+
+Modell: llama3.2:3b · Embedding: granite-embedding:278m · 14 Fragen
+
+Frage                                                Typ                rag
+Bis wann hat die Bibliothek am Samstag offen?        direkt             K A
+Was zahlt ein Gast in der Mensa für ein Hauptgerich  direkt             K A
+Wie viel kostet eine Ersatz-Campuskarte?             direkt             K A
+Was regelt Paragraph 17 der Prüfungsordnung?         kennung            K A
+Wofür brauche ich das Formular PA-12?                kennung            K A
+Wer sitzt in Raum F-201?                             kennung            · ·
+Ich bin am Tag meiner Klausur krank. Was muss ich t  umschrieben        K A
+Wo kann ich mein Auto abstellen und was kostet das?  umschrieben        K A
+Wo kann ich nachts noch lernen?                      umschrieben        K A
+Ich bin total gestresst und komme nicht mehr klar.   umschrieben        K ·
+Was passiert, wenn ich das Geld fürs nächste Semest  umschrieben        K A
+Wie oft darf ich eine Prüfung schreiben, bevor es e  umschrieben        K A
+Kann ich mit dem Semesterticket ICE fahren?          direkt             K A
+Wann ist die nächste Party der Fachschaft Informati  fehlt              - A
+
+K = richtige Datei im Kontext, A = Antwort enthält ein erwartetes Stichwort
+
+| Variante | Kontext richtig | Antwort richtig | Eingabe-Tokens (Ø) | Dauer (Ø) |
+|---|---|---|---|---|
+| rag | 12/13 | 12/14 | 891 | 49.1 s |
+
+
+
+
+1. Setzt zerlege() in rag.py um (TODO 4b), baut den Index neu und messt noch einmal. Was hat sich bei „Kontext richtig“, „Antwort
+richtig“ und den Eingabe-Tokens geändert?
+
+
+# index neubauen
+# docker compose run --rm app rag.py --index
+
+48 Abschnitte aus 21 Dateien indexiert, 768 Dimensionen, 9.2 s (granite-embedding:278m)
+
+# docker compose run --rm app vergleich_wissen.py rag
+· 14 Fragen
+
+Frage                                                Typ                rag
+Bis wann hat die Bibliothek am Samstag offen?        direkt             K A
+Was zahlt ein Gast in der Mensa für ein Hauptgerich  direkt             K A
+Wie viel kostet eine Ersatz-Campuskarte?             direkt             K A
+Was regelt Paragraph 17 der Prüfungsordnung?         kennung            K A
+Wofür brauche ich das Formular PA-12?                kennung            K A
+Wer sitzt in Raum F-201?                             kennung            · ·
+Ich bin am Tag meiner Klausur krank. Was muss ich t  umschrieben        K A
+Wo kann ich mein Auto abstellen und was kostet das?  umschrieben        K A
+Wo kann ich nachts noch lernen?                      umschrieben        K A
+Ich bin total gestresst und komme nicht mehr klar.   umschrieben        K A
+Was passiert, wenn ich das Geld fürs nächste Semest  umschrieben        K A
+Wie oft darf ich eine Prüfung schreiben, bevor es e  umschrieben        K A
+Kann ich mit dem Semesterticket ICE fahren?          direkt             K A
+Wann ist die nächste Party der Fachschaft Informati  fehlt              - A
+
+K = richtige Datei im Kontext, A = Antwort enthält ein erwartetes Stichwort
+
+| Variante | Kontext richtig | Antwort richtig | Eingabe-Tokens (Ø) | Dauer (Ø) |
+|---|---|---|---|---|
+| rag | 12/13 | 13/14 | 567 | 32.4 s |
+
+
+### antwort (tabellen vergleich)
+
+#
+| Variante | Kontext richtig | Antwort richtig | Eingabe-Tokens (Ø) | Dauer (Ø) |
+|---|---|---|---|---|
+| rag | 12/13 | 12/14 | 891 | 49.1 s |
+
+# index improv
+| Variante | Kontext richtig | Antwort richtig | Eingabe-Tokens (Ø) | Dauer (Ø) |
+|---|---|---|---|---|
+| rag | 12/13 | 13/14 | 567 | 32.4 s |
+
+Durch die Implementierung von zerlege() werden die 21 Dokumente anhand ihrer Überschriften in 48 kleinere Abschnitte zerlegt. Die Retrieval-Qualität bleibt mit 12/13 richtigen Kontexten unverändert. Die Antwortqualität verbessert sich jedoch von 12/14 auf 13/14, da nun auch die Frage zur psychischen Belastung korrekt beantwortet wurde.
+
+Die durchschnittlichen Eingabe-Tokens sinken von 891 auf 567, also um etwa 36,4 %. Auch die durchschnittliche Antwortdauer reduziert sich um etwa 33,9 %.
+
+Der Vorteil des Chunkings besteht darin, dass dem LLM kleinere, thematisch gezieltere Textabschnitte übergeben werden. Dadurch enthält der Kontext weniger irrelevante Informationen, was sowohl die Tokenkosten als auch die Verarbeitungslast reduziert und die Antwortqualität verbessern kann.
+
+
+
+
+
+
+
+2. Öffnet das Qdrant-Dashboard unter http://localhost:6333/dashboard , solange der Container läuft ( docker compose up -d qdrant ). Wie
+viele Punkte liegen in der Sammlung campus , und was steht neben dem Vektor in jedem Punkt? Wozu braucht wissen.py diese
+Angaben?
+
+### antwort
+n der Qdrant-Collection campus liegen 48 Punkte, die den 48 indexierten Textabschnitten aus 21 Markdown-Dateien entsprechen.
+
+Jeder Punkt enthält einen Embedding-Vektor mit 768 Dimensionen und zusätzlich folgende Metadaten (Payload):
+
+datei: Name der ursprünglichen Markdown-Datei, beispielsweise abschlussarbeit.md.
+
+text: Inhalt des zugehörigen Textabschnitts.
+
+Der Embedding-Vektor wird verwendet, um semantisch ähnliche Abschnitte zu einer Benutzerfrage zu finden.
+
+Die Metadaten werden benötigt, um aus den gefundenen Vektoren wieder lesbare Informationen zu erhalten. wissen.py verwendet den Textabschnitt, um ihn mit kontext_bauen() in den Prompt des LLM einzufügen. Der Dateiname dient zur Kennzeichnung der Quelle und wird in antworten() unter quellen gespeichert.
+
+Ohne diese Metadaten könnte die Vektordatenbank zwar ähnliche Vektoren finden, aber der Assistent hätte weder den ursprünglichen Text für seine Antwort noch den zugehörigen Dateinamen 
+
+
+3. Probiert -k 1 und -k 8 . Was gewinnt ihr, was verliert ihr?
+
+# docker compose run --rm app rag.py -k 1 "Ich bin am Tag meiner Klausur krank. Was muss ich tun?"
+
+  0.719  praxissemester.md          
+
+Wenn du am Tag deiner Klausur krank bist, solltest du dich an das Praktikum nicht melden und stattdessen einen Arzt aufsuchen, um deine Krankheit zu bestätigen. Danach solltest du dich an das Praktikum wiederaufnehmen und den Krankheitstag bei deinem Praktikumsvorstand beantragen.
+
+  Kontext: praxissemester.md
+  244 Eingabe-Tokens · Suche 3.96 s · Antwort 39.4 s · llama3.2:3b
+
+
+
+#  docker compose run --rm app rag.py -k 8 "Ich bin am Tag meiner Klausur krank. Was muss ich tun?"
+
+  0.719  praxissemester.md          
+  0.669  pruefungsunfaehigkeit.md   
+  0.666  beratung.md                
+  0.660  pruefungsunfaehigkeit.md   
+  0.659  pruefungsunfaehigkeit.md   
+  0.642  nachteilsausgleich.md      
+  0.633  rueckmeldung.md            
+  0.629  campuskarte.md             
+
+Wenn du am Tag deiner Klausur krank bist, solltest du dich an die Psychosoziale Beratung des Studierendenwerks wenden, um deine Situation zu besprechen. Wenn du eine ärztliche Bescheinigung für deine Prüfungsunfähigkeit erhältst, solltest du diese innerhalb von drei Werktagen beim Prüfungsamt einreichen, um deine Prüfungsunfähigkeit anzuerkennen. (Quelle: pruefungsunfaehigkeit.md)
+
+  Kontext: beratung.md, campuskarte.md, nachteilsausgleich.md, praxissemester.md, pruefungsunfaehigkeit.md, rueckmeldung.md
+  962 Eingabe-Tokens · Suche 0.09 s · Antwort 74.8 s · llama3.2:3b
+
+
+
+### antwort
+
+k=1, weniger tokens, kleiner kontext, potenziell schneller.
+     Richtige Info fehlt vllt
+
+K=2, bessere chance relevante infos zu finden.
+     Mehr Tokens, langsamere Antwort, irrelaventer Kontext
+
+
+## 4.4
+
+1. Ordnet die Fragen nach ihrem Typ ( direkt , kennung , umschrieben , fehlt ). Welche Variante gewinnt bei welchem Typ, und warum?
+2. Wo stand die richtige Datei im Kontext und die Antwort war trotzdem falsch? Was sagt das über die Fehlerquelle?
+3. Welche Variante würdet ihr für diese Wissensbasis in Produktion nehmen? Ab welcher Größe würdet ihr umsteigen, und worauf?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Teil 5 Zusatz
 
 
