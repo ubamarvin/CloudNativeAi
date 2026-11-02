@@ -24,28 +24,28 @@ STANDARD_PROMPT = "prompts/einordnen.v1.yaml"
 
 class Anfrage(BaseModel):
     anliegen: Literal["pruefung", "mensa", "bibliothek", "sonstiges"]
-    studiengang: str | None
+    studiengang: Literal["AIN", "WIN", "MSI"] | None
     frist: str | None
 
-    @field_validator("studiengang", "frist", mode="before")
-    @classmethod
-    def leer_zu_none(cls, wert):
-        if isinstance(wert, str):
-            if wert.strip().lower() in ("null", "none", ""):
-                return None
-        return wert
-    @field_validator("studiengang")
-    @classmethod
-    def studiengang_validieren(cls, wert):
-        if wert is None:
-            return None
-    
-        erlaubte_studiengaenge = {"AIN", "WIN", "MSI"}
-    
-        if wert.upper() not in erlaubte_studiengaenge:
-            return None
-    
-        return wert.upper()
+    ## @field_validator("studiengang", "frist", mode="before")
+    ## @classmethod
+    ## def leer_zu_none(cls, wert):
+    ##     if isinstance(wert, str):
+    ##         if wert.strip().lower() in ("null", "none", ""):
+    ##             return None
+    ##     return wert
+    ## @field_validator("studiengang")
+    ## @classmethod
+    ## def studiengang_validieren(cls, wert):
+    ##     if wert is None:
+    ##         return None
+    ## 
+    ##     erlaubte_studiengaenge = {"AIN", "WIN", "MSI"}
+    ## 
+    ##     if wert.upper() not in erlaubte_studiengaenge:
+    ##         return None
+    ## 
+    ##     return wert.upper()
 
 
 def schema_von(modell: type[BaseModel]) -> dict:

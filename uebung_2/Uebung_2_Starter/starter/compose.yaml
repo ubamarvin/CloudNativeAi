@@ -4,6 +4,11 @@ services:
     image: ollama/ollama:0.35.1
     volumes:
       - ollama-modelle:/root/.ollama   # Modelle überleben einen Neustart
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
     ports:
       - "11434:11434"
 
@@ -13,9 +18,16 @@ services:
     image: ollama/ollama:0.35.1
     environment:
       - OLLAMA_HOST=ollama:11434
-    entrypoint: ["sh", "-c", "ollama pull llama3.2:3b && ollama pull qwen2.5:0.5b"]
+    entrypoint:
+      - sh
+      - -ec
+      - |
+        for model in llama3.2:3b qwen2.5:0.5b; do
+          ollama show "$$model" >/dev/null 2>&1 || ollama pull "$$model"
+        done
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
 
   # Unsere Anwendung. Welches Modell sie nutzt, steht in .env.
   # Welches Skript läuft, bestimmt ihr beim Aufruf, z. B.:
@@ -34,3 +46,4 @@ volumes:
   # die Modelle werden also nur einmal heruntergeladen.
   ollama-modelle:
     name: cnai-ollama-modelle
+    external: true

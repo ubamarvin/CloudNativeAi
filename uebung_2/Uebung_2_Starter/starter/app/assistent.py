@@ -8,6 +8,8 @@ In Teil 3 greift ihr diesen Assistenten an und härtet ihn danach.
 """
 
 import argparse
+import re
+
 
 from llm import MODEL, client
 from prompts import Prompt, lade
@@ -27,6 +29,13 @@ def ausgabe_pruefen(text: str) -> str:
     ersetzt ihr sie durch eine feste, freundliche Absage.
     Im Moment wird alles unverändert durchgereicht.
     """
+    code = "8352"
+
+    ziffern = re.sub(r"\D", "", text)
+
+    if code in ziffern:
+        return "Diese interne Information kann ich nicht weitergeben."
+    
     return text
 
 
@@ -49,3 +58,4 @@ if __name__ == "__main__":
     prompt = lade(args.prompt)
     print(f"[{prompt.kennung} · {MODEL}]\n")
     print(antworten(" ".join(args.frage), prompt))
+
